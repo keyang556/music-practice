@@ -1,5 +1,8 @@
 """以 music21 產生「兩隻老虎」旋律的 MIDI 檔。
 
+安裝相依套件:
+    pip install -r requirements.txt
+
 用法:
     python two_tigers.py                    # 產生 two_tigers.mid
     python two_tigers.py -o out/tiger.mid   # 指定輸出路徑
@@ -70,12 +73,23 @@ def write_midi(score: stream.Score, output: Path) -> Path:
 
 # --- 命令列介面 -----------------------------------------------------------
 
+def positive_int(value: str) -> int:
+    """argparse 用的型別檢查：只接受正整數。"""
+    try:
+        number = int(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"{value!r} 不是整數")
+    if number <= 0:
+        raise argparse.ArgumentTypeError(f"速度必須大於 0（收到 {number}）")
+    return number
+
+
 def parse_args(argv=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=f"產生「{TITLE}」MIDI 檔")
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT,
                         help=f"輸出的 MIDI 檔路徑（預設 {DEFAULT_OUTPUT}）")
-    parser.add_argument("-t", "--tempo", type=int, default=DEFAULT_TEMPO,
-                        help=f"速度 BPM（預設 {DEFAULT_TEMPO}）")
+    parser.add_argument("-t", "--tempo", type=positive_int, default=DEFAULT_TEMPO,
+                        help=f"速度 BPM，須大於 0（預設 {DEFAULT_TEMPO}）")
     return parser.parse_args(argv)
 
 
